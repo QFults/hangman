@@ -4,10 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+  <title>Word Guess</title>
 </head>
 
 <body>
+  <h5>Word Guess Game</h5>
   <p id="winlose"></p>
   <p id="instructions"></p>
   <p>Guesses: <span id="guesses"></span></p>
@@ -29,6 +30,8 @@
     let losses = 0
     // number of game wins
     let wins = 0
+    // boolean of game state
+    let isOver = false
 
     // function to display the word
     const displayWord = () => {
@@ -36,28 +39,40 @@
       let wordDisp = ''
       // loop over the word and create characters
       for (let i = 0; i < chosenWord.length; i++) {
+        // display letter if already guessed
         if (lettersGuessed.indexOf(chosenWord[i]) !== -1) {
           wordDisp += chosenWord[i]
+          // otherwise display a blank
         } else {
           isWin = false
           wordDisp += '_ '
         }
       }
+      // show current progression of word
       document.getElementById('word').innerHTML = wordDisp
+      // check to see if all letters have been guessed
       if (isWin) {
+        // change game state to over and increase wins
+        isOver = true
         wins++
+        // show win display info
         document.getElementById('wins').textContent = wins
         document.getElementById('winlose').textContent = 'Congrats! You won!'
         document.getElementById('instructions').textContent = 'Press ENTER to begin a new game'
       }
     }
 
-    // picks a new word to be guessed and updates display
+    // start new word and original game state
     const newRound = () => {
+      // set initial values for game variables
+      isOver = false
+      guesses = 10
       lettersGuessed = []
+      // choose a new random word
       chosenWord = words[Math.floor(Math.random() * words.length)]
-      console.log(chosenWord)
+      // render current word state
       displayWord()
+      // reset display info for game
       document.getElementById('winlose').textContent = ''
       document.getElementById('instructions').textContent = ''
       document.getElementById('guesses').textContent = guesses
@@ -66,9 +81,10 @@
     }
 
     // key press event listener
-    document.onkeyup = event => {
-      // make sure the key is between a-z and not already guessed
-      if (event.keyCode >= 65 &&
+    document.onkeydown = event => {
+      // check letter, if already guessed, and if game is not over
+      if (!isOver &&
+        event.keyCode >= 65 &&
         event.keyCode <= 90 &&
         lettersGuessed.indexOf(event.key) === -1) {
         // add key to already guessed letters
@@ -76,21 +92,28 @@
         // check to make sure guessed letter is in word
         if (chosenWord.indexOf(event.key) !== -1) {
           displayWord()
+          // if they guessed wrong...
         } else {
           guesses--
           document.getElementById('guesses').textContent = guesses
+          // lose game if out of guesses
           if (guesses <= 0) {
+            // set game state to over and increase losses
+            isOver = true
             losses++
+            // show loss display info
             document.getElementById('losses').textContent = losses
             document.getElementById('winlose').textContent = 'Oh no! You lost!'
             document.getElementById('instructions').textContent = 'Press ENTER to begin a new game'
           }
         }
-      } else if (event.keyCode === 13) {
+        // handle ENTER key for game reset
+      } else if (event.keyCode === 13 && isOver) {
         newRound()
       }
     }
 
+    // starts the first round
     newRound()
 
   </script>
